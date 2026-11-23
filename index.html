@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tally: a finance dashboard for Obsidian</title>
+<meta name="description" content="Keep your budget in a Google Sheet. Tally turns it into charts you can open in Obsidian, on your computer and on your phone.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F4F5F1;font-family:'Geist',system-ui,sans-serif;color:#121412}
+a{text-decoration:none;color:inherit}
+button{font-family:inherit}
+.g{background:rgba(255,255,255,0.55);border:1px solid rgba(255,255,255,0.95);-webkit-backdrop-filter:blur(28px) saturate(170%);backdrop-filter:blur(28px) saturate(170%);box-shadow:0 0 0 1px rgba(18,20,18,0.06),inset 0 1px 0 #fff,0 28px 56px -28px rgba(20,30,20,0.32)}
+.g2{background:rgba(255,255,255,0.62);border:1px solid rgba(255,255,255,0.98);-webkit-backdrop-filter:blur(40px) saturate(180%);backdrop-filter:blur(40px) saturate(180%);box-shadow:0 0 0 1px rgba(18,20,18,0.06),inset 0 1px 0 #fff,0 60px 100px -40px rgba(20,30,20,0.42)}
+.gd{background:rgba(255,255,255,0.78);border:1px solid rgba(255,255,255,0.98);box-shadow:0 0 0 1px rgba(18,20,18,0.06),inset 0 1px 0 #fff,0 20px 40px -24px rgba(20,30,20,0.3)}
+.pill:hover{filter:brightness(1.3)}
+.serif{font-family:'Instrument Serif',Georgia,serif;font-weight:400}
+.mono{font-family:'Geist Mono',ui-monospace,monospace}
+
+.kpis .mono{font-size:10.5px!important}
+@media (max-width:820px){
+  .kpis{grid-template-columns:minmax(0,1fr)!important}
+  .kpis>div:last-child{grid-column:1/-1}
+  .kpis>div{padding:16px 14px!important}
+  .kpis>div>div:first-child{font-size:24px!important}
+  .kpis .mono{font-size:11.5px!important}
+  .cols2{grid-template-columns:minmax(0,1fr)!important}
+  .shot{padding:22px 16px 24px!important;border-radius:28px!important;overflow:hidden}
+  .shot .tabs{overflow-x:auto!important;max-width:100%}
+}
+</style>
+
+</head>
+<body>
+
+<div id="top" style="position:relative;width:100%;background:#F4F5F1;overflow:hidden">
+
+  <!-- SCENE -->
+  <div aria-hidden="true" style="position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none">
+    <div style="position:absolute;right:-6%;top:60px;width:640px;height:640px;border-radius:50%;background:#CFE3D6;opacity:0.85;filter:blur(110px)"></div>
+    <div style="position:absolute;left:-8%;top:520px;width:520px;height:520px;border-radius:50%;background:#F1DFC2;opacity:0.8;filter:blur(120px)"></div>
+    <div style="position:absolute;right:4%;top:1500px;width:560px;height:560px;border-radius:50%;background:#D6E2EA;opacity:0.85;filter:blur(120px)"></div>
+    <div style="position:absolute;left:2%;top:2300px;width:520px;height:520px;border-radius:50%;background:#CFE3D6;opacity:0.7;filter:blur(120px)"></div>
+    <div style="position:absolute;right:-4%;top:2900px;width:480px;height:480px;border-radius:50%;background:#F1DFC2;opacity:0.7;filter:blur(120px)"></div>
+
+    <!-- frosted glass tally marks -->
+    <div style="position:absolute;left:50%;top:70px;width:760px;height:760px;margin-left:120px">
+      <div class="g" style="position:absolute;left:0;top:30px;width:120px;height:680px;border-radius:60px"></div>
+      <div class="g" style="position:absolute;left:170px;top:0;width:120px;height:680px;border-radius:60px"></div>
+      <div class="g" style="position:absolute;left:340px;top:30px;width:120px;height:680px;border-radius:60px"></div>
+      <div class="g" style="position:absolute;left:510px;top:0;width:120px;height:680px;border-radius:60px"></div>
+      <div class="g" style="position:absolute;left:250px;top:-60px;width:120px;height:860px;border-radius:60px;transform:rotate(58deg);background:rgba(255,255,255,0.35)"></div>
+    </div>
+  </div>
+
+  <div style="position:relative">
+
+    <!-- NAV -->
+    <header style="padding:22px 24px 0;box-sizing:border-box">
+      <div class="g" style="max-width:920px;margin:0 auto;border-radius:99px;padding:10px 12px 10px 20px;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <a href="#top" style="display:flex;align-items:center;gap:11px"><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect x="0.8" y="0.8" width="30.4" height="30.4" rx="10" fill="none" stroke="#121412" stroke-width="1.3"/><circle cx="16" cy="16" r="9.4" fill="none" stroke="#121412" opacity="1" stroke-width="3.8" stroke-linecap="round" stroke-dasharray="26.11 59.06" stroke-dashoffset="-3.19" transform="rotate(-90 16 16)"/><circle cx="16" cy="16" r="9.4" fill="none" stroke="#121412" opacity="0.38" stroke-width="3.8" stroke-linecap="round" stroke-dasharray="11.35 59.06" stroke-dashoffset="-35.67" transform="rotate(-90 16 16)"/><circle cx="16" cy="16" r="9.4" fill="none" stroke="#12B76A" opacity="1" stroke-width="3.8" stroke-linecap="round" stroke-dasharray="2.49 59.06" stroke-dashoffset="-53.39" transform="rotate(-90 16 16)"/></svg><span class="serif" style="font-size:27px;line-height:1;letter-spacing:-0.02em">Tally</span></a>
+        <nav style="display:flex;align-items:center;gap:26px;font-size:15px;flex-wrap:wrap">
+          <a href="#sheet" style="color:rgba(18,20,18,0.72)">How it reads</a>
+          <a href="#features" style="color:rgba(18,20,18,0.72)">Features</a>
+          <a class="pill" href="https://github.com/Gusions/tally" style="background:#121412;color:#FFFFFF;padding:9px 18px;border-radius:99px;font-weight:600">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- HERO (variant: product screen as header) -->
+    <section style="max-width:1120px;margin:0 auto;padding:64px 40px 0;box-sizing:border-box;text-align:center">
+      <div class="g" style="display:inline-flex;align-items:center;gap:9px;padding:8px 16px;border-radius:99px;font-size:14px;font-weight:500;color:rgba(18,20,18,0.78)"><span style="width:8px;height:8px;border-radius:99px;background:#12B76A;display:inline-block"></span>A free plugin for Obsidian</div>
+      <h1 class="serif" style="margin:24px auto 0;max-width:1000px;text-wrap:balance;font-size:clamp(42px,5.6vw,76px);line-height:0.96;letter-spacing:-0.025em">Your money, <em>counted</em> in your vault.</h1>
+      <p style="margin:24px auto 0;max-width:560px;font-size:17px;line-height:1.55;color:rgba(18,20,18,0.74)">Keep your budget in a Google Sheet. Tally turns it into charts you can open in Obsidian, on your computer and on your phone.</p>
+      <div style="margin-top:30px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+        <a class="pill" href="https://github.com/Gusions/tally" style="display:inline-flex;align-items:center;background:#121412;color:#FFFFFF;padding:13px 22px;border-radius:99px;font-size:15px;font-weight:600">View on GitHub</a>
+        <a class="g" href="https://gusions.com" style="display:inline-flex;align-items:center;padding:13px 22px;border-radius:99px;font-size:15px;font-weight:600">Read the story</a>
+      </div>
+      <div class="g2" style="margin-top:48px;border-radius:44px;padding:12px;box-sizing:border-box;text-align:left">
+        <div style="background:#FCFCFA;border:1px solid rgba(18,20,18,0.05);border-radius:40px;padding:34px 38px 38px;box-sizing:border-box;display:flex;flex-direction:column;gap:22px;box-shadow:none" class="shot">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+    <div class="tabs" style="display:flex;align-items:center;gap:0;font-size:14.5px;white-space:nowrap;min-width:0;overflow:hidden"><span style="background:#fff;border:1px solid rgba(18,20,18,0.08);box-shadow:0 8px 18px -8px rgba(20,30,20,0.3);padding:10px 18px;border-radius:99px;font-weight:600">Overview</span><span style="padding:10px 11px;border-radius:99px;color:rgba(18,20,18,0.66);font-weight:500">Spending</span><span style="padding:10px 11px;border-radius:99px;color:rgba(18,20,18,0.66);font-weight:500">Income</span><span style="padding:10px 11px;border-radius:99px;color:rgba(18,20,18,0.66);font-weight:500">Net worth</span><span style="padding:10px 11px;border-radius:99px;color:rgba(18,20,18,0.66);font-weight:500">Investing</span><span style="padding:10px 11px;border-radius:99px;color:rgba(18,20,18,0.66);font-weight:500">Home</span><span style="padding:10px 11px;border-radius:99px;color:rgba(18,20,18,0.66);font-weight:500">Payments</span></div>
+    <div style="display:flex;align-items:center;gap:12px;font-size:14px;white-space:nowrap;flex-shrink:0">
+      <span style="display:inline-flex;align-items:center;gap:8px;font-weight:500"><span style="width:9px;height:9px;border-radius:99px;background:#12B76A;display:inline-block"></span>Synced</span>
+      <span style="color:rgba(18,20,18,0.66)">Jan–Nov</span>
+      <span style="display:inline-flex;gap:3px;padding:3px;border-radius:99px;background:rgba(18,20,18,0.06);font-weight:600;font-size:14px"><span style="background:#fff;box-shadow:0 4px 10px -4px rgba(20,30,20,0.3);padding:7px 16px;border-radius:99px">Charts</span><span style="padding:7px 16px;color:rgba(18,20,18,0.66);font-weight:500">Tables</span></span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#121412" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4z"></path></svg><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#121412" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#121412" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"></path></svg><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#121412" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg>
+    </div>
+  </div>
+
+  <div class="kpis" style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px"><div style="background:#fff;border:1px solid rgba(18,20,18,0.08);border-radius:22px;padding:20px 18px;box-sizing:border-box;min-width:0;overflow:hidden"><div style="font-size:clamp(19px,1.9vw,25px);font-weight:600;letter-spacing:-0.03em;line-height:1.1;white-space:nowrap">€24,860.00</div><div style="font-size:14px;color:rgba(18,20,18,0.74);margin-top:6px;white-space:nowrap">Liquidity</div><div class="mono" style="white-space:nowrap;font-size:11.5px;color:#0B8F55;margin-top:8px">▲ €3,420 vs Oct</div></div><div style="background:#fff;border:1px solid rgba(18,20,18,0.08);border-radius:22px;padding:20px 18px;box-sizing:border-box;min-width:0;overflow:hidden"><div style="font-size:clamp(19px,1.9vw,25px);font-weight:600;letter-spacing:-0.03em;line-height:1.1;white-space:nowrap">€41,380.00</div><div style="font-size:14px;color:rgba(18,20,18,0.74);margin-top:6px;white-space:nowrap">Liq. + deposit + inv.</div><div class="mono" style="white-space:nowrap;font-size:11.5px;color:rgba(18,20,18,0.6);margin-top:8px">Dep. €12.9k · inv. €3.6k</div></div><div style="background:#fff;border:1px solid rgba(18,20,18,0.08);border-radius:22px;padding:20px 18px;box-sizing:border-box;min-width:0;overflow:hidden"><div style="font-size:clamp(19px,1.9vw,25px);font-weight:600;letter-spacing:-0.03em;line-height:1.1;white-space:nowrap">€2,310.00</div><div style="font-size:14px;color:rgba(18,20,18,0.74);margin-top:6px;white-space:nowrap">Avg monthly spending</div><div class="mono" style="white-space:nowrap;font-size:11.5px;color:rgba(18,20,18,0.6);margin-top:8px">Jan–Oct, no one-offs</div></div><div style="background:#fff;border:1px solid rgba(18,20,18,0.08);border-radius:22px;padding:20px 18px;box-sizing:border-box;min-width:0;overflow:hidden"><div style="font-size:clamp(19px,1.9vw,25px);font-weight:600;letter-spacing:-0.03em;line-height:1.1;white-space:nowrap">11.2 months</div><div style="font-size:14px;color:rgba(18,20,18,0.74);margin-top:6px;white-space:nowrap">Runway</div><div class="mono" style="white-space:nowrap;font-size:11.5px;color:rgba(18,20,18,0.6);margin-top:8px">Liq. + dep. ÷ spending</div></div><div style="background:#fff;border:1px solid rgba(18,20,18,0.08);border-radius:22px;padding:20px 18px;box-sizing:border-box;min-width:0;overflow:hidden"><div style="font-size:clamp(19px,1.9vw,25px);font-weight:600;letter-spacing:-0.03em;line-height:1.1;white-space:nowrap">+€1,250.00</div><div style="font-size:14px;color:rgba(18,20,18,0.74);margin-top:6px;white-space:nowrap">November</div><div class="mono" style="white-space:nowrap;font-size:11.5px;color:rgba(18,20,18,0.6);margin-top:8px">In €3.65k · out €2.4k</div></div></div>
+
+  <div class="cols2" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+    <div style="background:#fff;border:1px solid rgba(18,20,18,0.08);border-radius:26px;padding:24px 26px;box-sizing:border-box">
+      <div style="font-size:17px;font-weight:600">Liquid wealth over time</div>
+      <div style="font-size:13px;color:rgba(18,20,18,0.62);margin-top:4px">Liquidity, deposit and investments since December 2025.</div>
+      <svg viewBox="0 0 590 255" style="width:100%;height:auto;margin-top:14px;display:block" role="img" aria-label="Line chart of liquidity, deposit and investments over twelve months, with the largest drop marked">
+        <line x1="36" y1="220" x2="500" y2="220" stroke="rgba(18,20,18,0.08)"></line><text x="28" y="224" text-anchor="end" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">0</text><line x1="36" y1="170" x2="500" y2="170" stroke="rgba(18,20,18,0.08)"></line><text x="28" y="174" text-anchor="end" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">10k</text><line x1="36" y1="120" x2="500" y2="120" stroke="rgba(18,20,18,0.08)"></line><text x="28" y="124" text-anchor="end" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">20k</text><line x1="36" y1="70" x2="500" y2="70" stroke="rgba(18,20,18,0.08)"></line><text x="28" y="74" text-anchor="end" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">30k</text><line x1="36" y1="20" x2="500" y2="20" stroke="rgba(18,20,18,0.08)"></line><text x="28" y="24" text-anchor="end" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">40k</text>
+        <line x1="254" y1="20" x2="254" y2="220" stroke="rgba(18,20,18,0.35)" stroke-dasharray="4 4"></line>
+        <text x="260" y="14" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">Largest drop</text>
+        <polyline points="40,214 79,213 118,212 157,210.5 196,209.5 235,208 274,207 313,206 352,205 391,204 430,203 469,202" fill="none" stroke="#C6C8CD" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></polyline>
+        <polyline points="40,190 79,187.5 118,185 157,182.5 196,180 235,177 274,170 313,166 352,162.5 391,160 430,158 469,155.5" fill="none" stroke="#8B8E93" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></polyline>
+        <polyline points="40,115 79,110 118,105 157,107.5 196,100 235,95 274,135 313,127.5 352,120 391,110 430,102.5 469,95.5" fill="none" stroke="#121412" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"></polyline>
+        <circle cx="469" cy="95.5" r="4.5" fill="#121412"></circle><circle cx="469" cy="155.5" r="4" fill="#8B8E93"></circle><circle cx="469" cy="202" r="4" fill="#C6C8CD"></circle>
+        <text x="480" y="99" font-family="Geist,sans-serif" font-size="12" fill="#121412">Liquidity</text>
+        <text x="480" y="159" font-family="Geist,sans-serif" font-size="12" fill="#6B6E73">Deposit</text>
+        <text x="480" y="206" font-family="Geist,sans-serif" font-size="12" fill="#6B6E73">Investments</text>
+        <text x="40" y="242" text-anchor="middle" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">Dec</text><text x="118" y="242" text-anchor="middle" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">Feb</text><text x="196" y="242" text-anchor="middle" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">Apr</text><text x="274" y="242" text-anchor="middle" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">Jun</text><text x="352" y="242" text-anchor="middle" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">Aug</text><text x="430" y="242" text-anchor="middle" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">Oct</text>
+      </svg>
+    </div>
+    <div style="background:#fff;border:1px solid rgba(18,20,18,0.08);border-radius:26px;padding:24px 26px;box-sizing:border-box">
+      <div style="font-size:17px;font-weight:600">Income and spending 2026</div>
+      <div style="font-size:13px;color:rgba(18,20,18,0.62);margin-top:4px">Spending excludes one-off expenses.</div>
+      <div style="display:flex;gap:18px;font-size:12px;color:rgba(18,20,18,0.74);margin-top:10px"><span style="display:flex;align-items:center;gap:7px"><span style="width:10px;height:10px;border-radius:3px;background:#121412"></span>Income</span><span style="display:flex;align-items:center;gap:7px"><span style="width:10px;height:10px;border-radius:3px;background:#C6C8CD"></span>Spending</span></div>
+      <svg viewBox="0 0 540 255" style="width:100%;height:auto;margin-top:6px;display:block" role="img" aria-label="Grouped bar chart of monthly income and spending">
+        <line x1="36" y1="220" x2="520" y2="220" stroke="rgba(18,20,18,0.08)"></line><text x="28" y="224" text-anchor="end" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">0</text><line x1="36" y1="170" x2="520" y2="170" stroke="rgba(18,20,18,0.08)"></line><text x="28" y="174" text-anchor="end" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">5k</text><line x1="36" y1="120" x2="520" y2="120" stroke="rgba(18,20,18,0.08)"></line><text x="28" y="124" text-anchor="end" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">10k</text><line x1="36" y1="70" x2="520" y2="70" stroke="rgba(18,20,18,0.08)"></line><text x="28" y="74" text-anchor="end" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">15k</text><line x1="36" y1="20" x2="520" y2="20" stroke="rgba(18,20,18,0.08)"></line><text x="28" y="24" text-anchor="end" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">20k</text><rect x="36" y="178" width="15" height="42" rx="4" fill="#121412"></rect><rect x="54" y="191" width="15" height="29" rx="4" fill="#C6C8CD"></rect><rect x="80" y="178" width="15" height="42" rx="4" fill="#121412"></rect><rect x="98" y="194" width="15" height="26" rx="4" fill="#C6C8CD"></rect><rect x="124" y="178" width="15" height="42" rx="4" fill="#121412"></rect><rect x="142" y="192" width="15" height="28" rx="4" fill="#C6C8CD"></rect><rect x="168" y="176" width="15" height="44" rx="4" fill="#121412"></rect><rect x="186" y="195" width="15" height="25" rx="4" fill="#C6C8CD"></rect><rect x="212" y="176" width="15" height="44" rx="4" fill="#121412"></rect><rect x="230" y="189" width="15" height="31" rx="4" fill="#C6C8CD"></rect><rect x="256" y="176" width="15" height="44" rx="4" fill="#121412"></rect><rect x="274" y="196" width="15" height="24" rx="4" fill="#C6C8CD"></rect><rect x="300" y="152" width="15" height="68" rx="4" fill="#121412"></rect><rect x="318" y="184" width="15" height="36" rx="4" fill="#C6C8CD"></rect><rect x="344" y="176" width="15" height="44" rx="4" fill="#121412"></rect><rect x="362" y="193" width="15" height="27" rx="4" fill="#C6C8CD"></rect><rect x="388" y="176" width="15" height="44" rx="4" fill="#121412"></rect><rect x="406" y="195" width="15" height="25" rx="4" fill="#C6C8CD"></rect><rect x="432" y="174" width="15" height="46" rx="4" fill="#121412"></rect><rect x="450" y="191" width="15" height="29" rx="4" fill="#C6C8CD"></rect><rect x="476" y="125" width="15" height="95" rx="4" fill="#121412"></rect><rect x="494" y="196" width="15" height="24" rx="4" fill="#C6C8CD"></rect><text x="52" y="240" text-anchor="middle" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">J</text><text x="96" y="240" text-anchor="middle" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">F</text><text x="140" y="240" text-anchor="middle" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">M</text><text x="184" y="240" text-anchor="middle" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">A</text><text x="228" y="240" text-anchor="middle" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">M</text><text x="272" y="240" text-anchor="middle" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">J</text><text x="316" y="240" text-anchor="middle" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">J</text><text x="360" y="240" text-anchor="middle" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">A</text><text x="404" y="240" text-anchor="middle" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">S</text><text x="448" y="240" text-anchor="middle" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">O</text><text x="492" y="240" text-anchor="middle" font-family="Geist Mono,monospace" font-size="10" fill="#6B6E73">N</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="cols2" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+    <div style="background:#fff;border:1px solid rgba(18,20,18,0.08);border-radius:26px;padding:24px 26px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px">
+      <div><div style="font-size:17px;font-weight:600">Where the money goes</div><div style="font-size:13px;color:rgba(18,20,18,0.62);margin-top:4px">January–November total by category, excluding one-offs.</div></div>
+      <div style="display:flex;align-items:center;gap:16px;font-size:14px"><span style="width:104px;color:rgba(18,20,18,0.84)">Home</span><span style="flex:1;height:9px;border-radius:99px;background:rgba(18,20,18,0.08);position:relative"><span style="position:absolute;left:0;top:0;bottom:0;width:100%;border-radius:99px;background:#121412"></span></span><span class="mono" style="width:86px;text-align:right;font-size:13px">€7,120.00</span></div><div style="display:flex;align-items:center;gap:16px;font-size:14px"><span style="width:104px;color:rgba(18,20,18,0.84)">Eating out</span><span style="flex:1;height:9px;border-radius:99px;background:rgba(18,20,18,0.08);position:relative"><span style="position:absolute;left:0;top:0;bottom:0;width:91%;border-radius:99px;background:#121412"></span></span><span class="mono" style="width:86px;text-align:right;font-size:13px">€6,450.00</span></div><div style="display:flex;align-items:center;gap:16px;font-size:14px"><span style="width:104px;color:rgba(18,20,18,0.84)">Travel</span><span style="flex:1;height:9px;border-radius:99px;background:rgba(18,20,18,0.08);position:relative"><span style="position:absolute;left:0;top:0;bottom:0;width:56%;border-radius:99px;background:#121412"></span></span><span class="mono" style="width:86px;text-align:right;font-size:13px">€3,980.00</span></div><div style="display:flex;align-items:center;gap:16px;font-size:14px"><span style="width: 104px; color: rgba(18, 20, 18, 0.84)">Health</span><span style="flex: 1 1 0%; height: 9px; border-radius: 99px; background: rgba(18, 20, 18, 0.08); position: relative"><span style="position: absolute; left: 0px; top: 0px; bottom: 0px; width: 37%; border-radius: 99px; background: rgb(18, 20, 18)"></span></span><span class="mono" style="width: 86px; text-align: right; font-size: 13px">€2,610.00</span></div><div style="display:flex;align-items:center;gap:16px;font-size:14px"><span style="width:104px;color:rgba(18,20,18,0.84)">Other</span><span style="flex:1;height:9px;border-radius:99px;background:rgba(18,20,18,0.08);position:relative"><span style="position:absolute;left:0;top:0;bottom:0;width:27%;border-radius:99px;background:#121412"></span></span><span class="mono" style="width:86px;text-align:right;font-size:13px">€1,940.00</span></div>
+    </div>
+    <div style="background:#fff;border:1px solid rgba(18,20,18,0.08);border-radius:26px;padding:24px 26px 12px;box-sizing:border-box">
+      <div style="font-size:17px;font-weight:600">Upcoming payments</div>
+      <div style="font-size:13px;color:rgba(18,20,18,0.62);margin-top:4px;margin-bottom:10px">Scheduled payments in the next 30 days.</div>
+      <div style="display:flex;gap:18px;padding:12px 0;border-top:1px solid rgba(18,20,18,0.08);font-size:15px"><span class="mono" style="font-size:13px;color:rgba(18,20,18,0.6);min-width:48px">26/11</span><span style="flex:1">Internet</span><span class="mono" style="font-size:13px">€29.00</span></div><div style="display:flex;gap:18px;padding:12px 0;border-top:1px solid rgba(18,20,18,0.08);font-size:15px"><span class="mono" style="font-size:13px;color:rgba(18,20,18,0.6);min-width:48px">30/11</span><span style="flex:1">Streaming</span><span class="mono" style="font-size:13px">€12.00</span></div><div style="display:flex;gap:18px;padding:12px 0;border-top:1px solid rgba(18,20,18,0.08);font-size:15px"><span class="mono" style="font-size:13px;color:rgba(18,20,18,0.6);min-width:48px">07/12</span><span style="flex:1">Insurance</span><span class="mono" style="font-size:13px">€64.00</span></div><div style="display:flex;gap:18px;padding:12px 0;border-top:1px solid rgba(18,20,18,0.08);font-size:15px"><span class="mono" style="font-size:13px;color:rgba(18,20,18,0.6);min-width:48px">09/12</span><span style="flex:1">Gym</span><span class="mono" style="font-size:13px">€39.00</span></div><div style="display:flex;gap:18px;padding:12px 0;border-top:1px solid rgba(18,20,18,0.08);font-size:15px"><span class="mono" style="font-size:13px;color:rgba(18,20,18,0.6);min-width:48px">20/12</span><span style="flex:1">Train pass</span><span class="mono" style="font-size:13px">€48.00</span></div>
+    </div>
+  </div>
+
+</div>
+      </div>
+      <div class="mono" style="margin-top:14px;font-size:12px;color:rgba(18,20,18,0.5)">Sample data</div>
+    </section>
+
+    <!-- SHEET TO VAULT -->
+    <section id="sheet" style="max-width:1120px;margin:0 auto;padding:130px 40px 0;box-sizing:border-box">
+      <h2 class="serif" style="margin:0;font-size:clamp(34px,4vw,52px);line-height:0.98;letter-spacing:-0.02em;max-width:760px">From your sheet to your <em>vault</em>.</h2>
+      <p style="margin:20px 0 0;max-width:520px;font-size:17px;line-height:1.55;color:rgba(18,20,18,0.74)">Keep tracking in your spreadsheet like you always do. Tally does the sums and draws the charts.</p>
+      <div style="margin-top:56px;display:flex;flex-wrap:wrap;gap:28px;align-items:center">
+
+        <div class="g" style="flex:1 1 420px;min-width:0;border-radius:26px;padding:14px;box-sizing:border-box">
+          <div style="background:rgba(255,255,255,0.85);border-radius:16px;overflow:hidden">
+            <div class="mono" style="display:flex;font-size:11px;color:rgba(18,20,18,0.55);background:rgba(18,20,18,0.04);border-bottom:1px solid rgba(18,20,18,0.1)"><span style="width:34px;padding:8px 10px"></span><span style="flex:1;padding:8px 10px">A · Date</span><span style="flex:1.4;padding:8px 10px">B · Category</span><span style="flex:1;padding:8px 10px;background:#CFE3D6;color:#121412">C · Amount</span></div>
+            <div class="mono" style="display:flex;font-size:13px;border-bottom:1px solid rgba(18,20,18,0.07)"><span style="width:34px;padding:10px;color:rgba(18,20,18,0.45)">1</span><span style="flex:1;padding:10px">01/11</span><span style="flex:1.4;padding:10px;font-family:'Geist',sans-serif">Salary</span><span style="flex:1;padding:10px;background:rgba(207,227,214,0.5)">2,400.00</span></div>
+            <div class="mono" style="display:flex;font-size:13px;border-bottom:1px solid rgba(18,20,18,0.07)"><span style="width:34px;padding:10px;color:rgba(18,20,18,0.45)">2</span><span style="flex:1;padding:10px">02/11</span><span style="flex:1.4;padding:10px;font-family:'Geist',sans-serif">Rent</span><span style="flex:1;padding:10px;background:rgba(207,227,214,0.5)">−720.00</span></div>
+            <div class="mono" style="display:flex;font-size:13px;border-bottom:1px solid rgba(18,20,18,0.07)"><span style="width:34px;padding:10px;color:rgba(18,20,18,0.45)">3</span><span style="flex:1;padding:10px">05/11</span><span style="flex:1.4;padding:10px;font-family:'Geist',sans-serif">Groceries</span><span style="flex:1;padding:10px;background:rgba(207,227,214,0.5)">−84.20</span></div>
+            <div class="mono" style="display:flex;font-size:13px"><span style="width:34px;padding:10px;color:rgba(18,20,18,0.45)">4</span><span style="flex:1;padding:10px">09/11</span><span style="flex:1.4;padding:10px;font-family:'Geist',sans-serif">Dinner</span><span style="flex:1;padding:10px;background:rgba(207,227,214,0.5)">−46.00</span></div>
+          </div>
+          <div style="padding:14px 8px 4px;font-size:13px;color:rgba(18,20,18,0.64)">Your Google Sheet. Sample rows.</div>
+        </div>
+
+        <div aria-hidden="true" style="flex:none;display:flex;align-items:center;justify-content:center;width:64px"><svg width="56" height="24" viewBox="0 0 56 24" fill="none" stroke="#121412" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h50M42 4l10 8-10 8"></path></svg></div>
+
+        <div class="g2" style="flex:1 1 320px;min-width:0;border-radius:26px;padding:26px;box-sizing:border-box">
+          <div style="font-size:14px;color:rgba(18,20,18,0.64)">Spent · November</div>
+          <div class="serif" style="font-size:72px;line-height:0.95;letter-spacing:-0.03em;margin-top:8px">€1,840</div>
+          <div style="display:flex;gap:6px;align-items:flex-end;height:64px;margin-top:22px">
+            <div style="flex:1;height:34px;border-radius:7px;background:rgba(18,20,18,0.14)"></div><div style="flex:1;height:48px;border-radius:7px;background:rgba(18,20,18,0.14)"></div><div style="flex:1;height:28px;border-radius:7px;background:rgba(18,20,18,0.14)"></div><div style="flex:1;height:42px;border-radius:7px;background:rgba(18,20,18,0.14)"></div><div style="flex:1;height:58px;border-radius:7px;background:#121412"></div>
+          </div>
+          <div style="margin-top:14px;font-size:13px;color:rgba(18,20,18,0.64)">Your vault, in Obsidian.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features" style="max-width:1120px;margin:0 auto;padding:130px 40px 0;box-sizing:border-box">
+      <h2 class="serif" style="margin:0;font-size:clamp(34px,4vw,52px);line-height:0.98;letter-spacing:-0.02em;max-width:820px">Simple on the surface. <em>Private</em> underneath.</h2>
+      <div style="margin-top:56px;display:flex;flex-direction:column;gap:20px">
+
+        <div class="g" style="border-radius:36px;padding:18px;box-sizing:border-box;display:flex;flex-wrap:wrap;align-items:center;gap:20px">
+          <div style="flex:1 1 420px;min-width:0;height:270px;display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;border-radius:24px;background:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.95);box-shadow:inset 0 1px 0 #fff;box-sizing:border-box;padding:0 28px" aria-hidden="true">
+            <div style="width:124px;height:124px;border-radius:99px;background:rgba(18,183,106,0.12);border:1px solid rgba(18,183,106,0.45);display:flex;align-items:center;justify-content:center;box-shadow:0 0 50px rgba(18,183,106,0.28)"><svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#0B8F55" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></div>
+            <div style="display:flex;flex-direction:column;gap:10px"><span class="gd mono" style="font-size:13px;padding:9px 16px;border-radius:99px">sheet · private</span><span class="gd mono" style="font-size:13px;padding:9px 16px;border-radius:99px">public link · none</span></div>
+          </div>
+          <div style="flex:1 1 420px;min-width:0;padding:10px 40px 10px 28px">
+            <h3 class="serif" style="margin:0;font-size:36px;line-height:1.05;letter-spacing:-0.015em">Your Google, not a link.</h3>
+            <p style="margin:16px 0 0;max-width:440px;font-size:16px;line-height:1.55;color:rgba(18,20,18,0.74)">Your sheet stays private. Tally signs in with your own Google account, read-only: nothing is shared and nothing passes through our servers.</p>
+          </div>
+        </div>
+
+        <div class="g" style="border-radius:36px;padding:18px;box-sizing:border-box;display:flex;flex-wrap:wrap;flex-direction:row-reverse;align-items:center;gap:20px">
+          <div style="flex:1 1 420px;min-width:0;height:270px;display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;border-radius:24px;background:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.95);box-shadow:inset 0 1px 0 #fff;box-sizing:border-box;padding:0 28px" aria-hidden="true">
+            <div class="gd" style="width: 219px; height: 214px; border-radius: 26px; padding: 13px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px"><div class="serif" style="font-size:32px;line-height:1">€1,840</div><div style="display:flex;align-items:flex-end;gap:5px;flex:1"><div style="flex:1;height:40%;border-radius:5px;background:rgba(18,20,18,0.14)"></div><div style="flex:1;height:65%;border-radius:5px;background:rgba(18,20,18,0.14)"></div><div style="flex:1;height:50%;border-radius:5px;background:rgba(18,20,18,0.14)"></div><div style="flex:1;height:85%;border-radius:5px;background:#121412"></div></div></div>
+            <div style="display:flex;flex-direction:column;gap:10px"><span class="gd mono" style="font-size:13px;padding:9px 16px;border-radius:99px">obsidian · mobile</span><span class="gd mono" style="font-size:13px;padding:9px 16px;border-radius:99px">obsidian · desktop</span></div>
+          </div>
+          <div style="flex:1 1 420px;min-width:0;padding:10px 40px 10px 28px">
+            <h3 class="serif" style="margin:0;font-size:36px;line-height:1.05;letter-spacing:-0.015em">In your pocket.</h3>
+            <p style="margin:16px 0 0;max-width:440px;font-size:16px;line-height:1.55;color:rgba(18,20,18,0.74)">Open Obsidian on your phone and your dashboard is already there.</p>
+          </div>
+        </div>
+
+        <div class="g" style="border-radius:36px;padding:18px;box-sizing:border-box;display:flex;flex-wrap:wrap;align-items:center;gap:20px">
+          <div style="flex:1 1 420px;min-width:0;height:270px;display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;border-radius:24px;background:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.95);box-shadow:inset 0 1px 0 #fff;box-sizing:border-box;padding:0 28px" aria-hidden="true">
+            <div class="gd" style="width:100%;max-width:430px;border-radius:20px;padding:6px 20px">
+              <div style="display:flex;gap:14px;padding:13px 0;border-bottom:1px solid rgba(18,20,18,0.1);font-size:15px"><span class="mono" style="white-space:nowrap;font-size:11.5px;color:rgba(18,20,18,0.6);min-width:48px">28 Nov</span><span style="flex:1">Internet</span><span class="mono" style="font-size:13px">€29</span></div>
+              <div style="display:flex;gap:14px;padding:13px 0;border-bottom:1px solid rgba(18,20,18,0.1);font-size:15px"><span class="mono" style="white-space:nowrap;font-size:11.5px;color:rgba(18,20,18,0.6);min-width:48px">02 Dec</span><span style="flex:1">Streaming</span><span class="mono" style="font-size:13px">€12</span></div>
+              <div style="display:flex;gap:14px;padding:13px 0;font-size:15px"><span class="mono" style="white-space:nowrap;font-size:11.5px;color:rgba(18,20,18,0.6);min-width:48px">10 Dec</span><span style="flex:1">Insurance</span><span class="mono" style="font-size:13px">€64</span></div>
+            </div>
+          </div>
+          <div style="flex:1 1 420px;min-width:0;padding:10px 40px 10px 28px">
+            <h3 class="serif" style="margin:0;font-size:36px;line-height:1.05;letter-spacing:-0.015em">What is due next.</h3>
+            <p style="margin:16px 0 0;max-width:440px;font-size:16px;line-height:1.55;color:rgba(18,20,18,0.74)">See the bills coming up in the next 30 days, before they hit your account.</p>
+          </div>
+        </div>
+      </div>
+
+      
+    </section>
+
+    <!-- SOON -->
+    <section id="soon" style="max-width:1120px;margin:0 auto;padding:130px 40px 0;box-sizing:border-box">
+      <div class="g2" style="border-radius:40px;padding:56px;box-sizing:border-box;display:flex;flex-wrap:wrap;gap:40px;align-items:center;justify-content:space-between">
+        <div style="flex:1 1 360px;min-width:0">
+          <h2 class="serif" style="margin:0;font-size:clamp(34px,4vw,52px);line-height:0.98;letter-spacing:-0.02em">Get <em>Tally</em>.</h2>
+          <p style="margin:16px 0 0;font-size:16px;line-height:1.55;color:rgba(18,20,18,0.76)">Free and open source. Grab the plugin and a ready-made spreadsheet from GitHub, and you are set up in ten minutes.</p>
+        </div>
+        <a class="pill" href="https://github.com/Gusions/tally" style="display:inline-flex;background:#121412;color:#FFFFFF;padding:16px 30px;border-radius:99px;font-size:17px;font-weight:600">View on GitHub</a>
+      </div>
+    </section>
+
+    <footer style="padding:110px 0 0;box-sizing:border-box">
+      <div class="g2" style="border-radius:0;border-left:0;border-right:0;border-bottom:0;padding:56px 0 0;box-sizing:border-box;overflow:hidden"><div style="max-width:1120px;margin:0 auto;padding:0 40px;box-sizing:border-box">
+        <div style="display:flex;flex-wrap:wrap;gap:40px 32px;justify-content:space-between">
+          <div style="flex:2 1 280px;min-width:240px">
+            <div style="display:flex;align-items:center;gap:14px"><svg width="40" height="40" viewBox="0 0 32 32" aria-hidden="true"><rect x="0.8" y="0.8" width="30.4" height="30.4" rx="10" fill="none" stroke="#121412" stroke-width="1.3"/><circle cx="16" cy="16" r="9.4" fill="none" stroke="#121412" opacity="1" stroke-width="3.8" stroke-linecap="round" stroke-dasharray="26.11 59.06" stroke-dashoffset="-3.19" transform="rotate(-90 16 16)"/><circle cx="16" cy="16" r="9.4" fill="none" stroke="#121412" opacity="0.38" stroke-width="3.8" stroke-linecap="round" stroke-dasharray="11.35 59.06" stroke-dashoffset="-35.67" transform="rotate(-90 16 16)"/><circle cx="16" cy="16" r="9.4" fill="none" stroke="#12B76A" opacity="1" stroke-width="3.8" stroke-linecap="round" stroke-dasharray="2.49 59.06" stroke-dashoffset="-53.39" transform="rotate(-90 16 16)"/></svg><span class="serif" style="font-size:40px;line-height:1;letter-spacing:-0.02em">Tally</span></div>
+            <p style="margin:16px 0 0;max-width:320px;font-size:15px;line-height:1.55;color:rgba(18,20,18,0.7)">Your budget spreadsheet, turned into a dashboard inside Obsidian.</p>
+            <div class="gd" style="margin-top:20px;display:inline-flex;align-items:center;gap:9px;padding:8px 15px;border-radius:99px;font-size:13px;font-weight:500"><span style="width:8px;height:8px;border-radius:99px;background:#12B76A;display:inline-block"></span>Early release · v0.9.10</div>
+          </div>
+          <div style="flex:1 1 150px;min-width:140px"><div class="mono" style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:rgba(18,20,18,0.5);margin-bottom:12px">Product</div><a href="#sheet" style="display:block;padding:6px 0;font-size:15px;color:rgba(18,20,18,0.74)">How it reads</a><a href="#features" style="display:block;padding:6px 0;font-size:15px;color:rgba(18,20,18,0.74)">Features</a><a href="#soon" style="display:block;padding:6px 0;font-size:15px;color:rgba(18,20,18,0.74)">Get Tally</a></div>
+          <div style="flex:1 1 150px;min-width:140px"><div class="mono" style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:rgba(18,20,18,0.5);margin-bottom:12px">Plugins</div><a href="#" style="display:block;padding:6px 0;font-size:15px;color:rgba(18,20,18,0.74)">Kith</a><a href="#" style="display:block;padding:6px 0;font-size:15px;color:rgba(18,20,18,0.74)">Crate</a><a href="#" style="display:block;padding:6px 0;font-size:15px;color:rgba(18,20,18,0.74)">Parley</a><a href="#" style="display:block;padding:6px 0;font-size:15px;color:rgba(18,20,18,0.74)">Quill</a><a href="#" style="display:block;padding:6px 0;font-size:15px;color:rgba(18,20,18,0.74)">Launchpad</a></div>
+          <div style="flex:1 1 150px;min-width:140px"><div class="mono" style="font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:rgba(18,20,18,0.5);margin-bottom:12px">Elsewhere</div><a href="https://gusions.com" style="display:block;padding:6px 0;font-size:15px;color:rgba(18,20,18,0.74)">Blog</a><a href="https://github.com/Gusions/tally" style="display:block;padding:6px 0;font-size:15px;color:rgba(18,20,18,0.74)">GitHub</a></div>
+        </div>
+        <div style="margin-top:44px;padding:20px 0;border-top:1px solid rgba(18,20,18,0.12);display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;font-size:13px;color:rgba(18,20,18,0.62)">
+          <span>© 2026 Tally · a plugin by @gusions</span>
+          <span>Not affiliated with Obsidian · All figures shown are sample data</span>
+        </div>
+        <div class="serif" aria-hidden="true" style="font-size:clamp(120px,24vw,300px);line-height:0.74;letter-spacing:-0.04em;text-align:center;color:rgba(18,20,18,0.07);white-space:nowrap;margin:8px -20px 0;height:0.62em;overflow:hidden;user-select:none">tally</div>
+      </div></div>
+    </footer>
+  </div>
+</div>
+
+</body>
+</html>
